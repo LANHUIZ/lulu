@@ -16,7 +16,23 @@ interface SceneContentProps {
   orbitRotation: { x: number; y: number };
   handPosition: { x: number; y: number } | null;
   onStarFocusChange?: (focused: boolean) => void;
+  onPhotosChange?: (photos: string[]) => void; // 添加照片变更回调
 }
+
+// 预设照片的Base64数据（小型占位图）
+const PRESET_PHOTOS_BASE64 = [
+  // 圣诞家庭照
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiMyRjk0NEEiLz48cGF0aCBkPSJNODAgMTIwQzEwMCA4MCAxNDAgODAgMTYwIDEyMCIgc3Ryb2tlPSIjRkZGIiBzdHJva2Utd2lkdGg9IjgiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI3MCIgcj0iMjAiIGZpbGw9IiNGRkYiLz48Y2lyY2xlIGN4PSI2MCIgY3k9IjEwMCIgcj0iMTUiIGZpbGw9IiNGRkYiLz48Y2lyY2xlIGN4PSIxNDAiIGN5PSIxMDAiIHI9IjE1IiBmaWxsPSIjRkZGIi8+PHBhdGggZD0iTTY1IDEzMEw1MCAxNTBNMTM1IDEzMEwxNTAgMTUwIiBzdHJva2U9IiNGRkYiIHN0cm9rZS13aWR0aD0iNiIvPjwvc3ZnPg==',
+  
+  // 可爱宠物
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiM0REJCOTMiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI4MCIgcj0iNDAiIGZpbGw9IiNGRkYiLz48Y2lyY2xlIGN4PSI4MCIgY3k9IjYwIiByPSI4IiBmaWxsPSIjMzMzIi8+PGNpcmNsZSBjeD0iMTIwIiBjeT0iNjAiIHI9IjgiIGZpbGw9IiMzMzMiLz48cGF0aCBkPSJNODUgMTEwTDEwMCAxMjBNMTE1IDExMEwxMDAgMTIwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iNSIvPjxwYXRoIGQ9Ik04MCAxNDBMMTIwIDE0MCIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjgiLz48L3N2Zz4=',
+  
+  // 朋友聚会
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRjY2MzMiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjgwIiByPSIyMCIgZmlsbD0iI0ZGRiIvPjxjaXJjbGUgY3g9IjEzMCIgY3k9IjgwIiByPSIyMCIgZmlsbD0iI0ZGRiIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEyMCIgcj0iMjUiIGZpbGw9IiNGRkYiLz48cGF0aCBkPSJNNTAgNjBMMjAgNDBNMTUwIDYwTDE4MCA0MCIgc3Ryb2tlPSIjRkZGIiBzdHJva2Utd2lkdGg9IjYiLz48cGF0aCBkPSJNNjAgMTYwTDE0MCAxNjAiIHN0cm9rZT0iI0ZGRiIgc3Ryb2tlLXdpZHRoPSI4Ii8+PHBhdGggZD0iTTEwMCAxNDBMMTAwIDEwMCIgc3Ryb2tlPSIjRkZGIiBzdHJva2Utd2lkdGg9IjYiLz48L3N2Zz4=',
+  
+  // 冬日雪景
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiM4Q0JGRkYiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI2MCIgcj0iMjAiIGZpbGw9IiNGRkYiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjkwIiByPSIxNSIgZmlsbD0iI0ZGRiIvPjxjaXJjbGUgY3g9IjE1MCIgY3k9IjkwIiByPSIxNSIgZmlsbD0iI0ZGRiIvPjxyZWN0IHg9IjQwIiB5PSIxMjAiIHdpZHRoPSIxMjAiIGhlaWdodD0iNDAiIGZpbGw9IiNGRkYiIHJ4PSIyMCIvPjxwYXRoIGQ9Ik0zMCA0MEw1MCAyME0xNzAgNDBMMTUwIDIwTTgwIDMwTDYwIDEwTTEyMCAzMEwxNDAgMTAiIHN0cm9rZT0iI0ZGRiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PC9zdmc+',
+];
 
 function CameraController({ 
   state, 
@@ -191,6 +207,7 @@ function SceneContent({
   orbitRotation,
   handPosition,
   onStarFocusChange,
+  onPhotosChange, // 新增的回调函数
 }: SceneContentProps) {
   const [isStarFocused, setIsStarFocused] = useState(false);
 
@@ -208,15 +225,10 @@ function SceneContent({
         onStarFocused={handleStarFocused}
       />
       
-      {/* 
-        Remove Environment component entirely - it loads HDR from raw.githack.com which is blocked in China.
-        Use enhanced lighting instead for reflections.
-      */}
-      
-      {/* Simplified lighting - fewer point lights for better performance */}
+      {/* 简化灯光配置 */}
       <ambientLight intensity={0.2} />
       
-      {/* Single main spotlight */}
+      {/* 主聚光灯 */}
       <spotLight 
         position={[0, 12, 5]} 
         angle={0.6}
@@ -225,10 +237,10 @@ function SceneContent({
         color="#fff8e8"
       />
       
-      {/* Single colored accent light */}
+      {/* 彩色点光源 */}
       <pointLight position={[0, -2, 0]} intensity={1.2} color="#ff6633" distance={12} />
       
-      {/* Background stars - reduced count for performance */}
+      {/* 背景星星 */}
       <Stars 
         radius={100} 
         depth={50} 
@@ -239,32 +251,32 @@ function SceneContent({
         speed={0.3}
       />
       
-      {/* Main particle system */}
+      {/* 主要粒子系统 */}
       <ParticleSystem state={state} particleCount={4000} />
       
-      {/* Christmas gift boxes */}
+      {/* 圣诞礼物盒 */}
       <GiftBoxes state={state} />
       
-      {/* Gem ornaments (cubes & icosahedrons) */}
+      {/* 宝石装饰品 */}
       <GemOrnaments state={state} />
       
-      {/* Tetrahedron spiral ribbon */}
+      {/* 四面体螺旋 */}
       <TetrahedronSpiral state={state} />
       
-      {/* Photo cards */}
+      {/* 照片卡片 - 显示预设照片 */}
       <PhotoCards 
         state={state} 
         photos={photos}
         focusedIndex={focusedPhotoIndex}
       />
       
-      {/* Tree star topper */}
+      {/* 树顶星星 */}
       <TreeStar state={state} isFocused={isStarFocused} />
       
-      {/* Snow effect - activates when star is focused */}
+      {/* 雪效果 */}
       <SnowEffect active={isStarFocused} />
       
-      {/* Post-processing effects - enhanced glow */}
+      {/* 后期处理效果 */}
       <EffectComposer>
         <Bloom 
           luminanceThreshold={0.85}
@@ -289,6 +301,7 @@ interface ChristmasSceneProps {
   handPosition: { x: number; y: number } | null;
   onReady?: () => void;
   onStarFocusChange?: (focused: boolean) => void;
+  onPhotosChange?: (photos: string[]) => void; // 新增：照片变更回调
 }
 
 export function ChristmasScene({ 
@@ -299,14 +312,16 @@ export function ChristmasScene({
   handPosition,
   onReady,
   onStarFocusChange,
+  onPhotosChange, // 接收照片变更回调
 }: ChristmasSceneProps) {
-  // Call onReady after mount
+  // 场景就绪回调
   useEffect(() => {
     const timer = setTimeout(() => {
       onReady?.();
     }, 500);
     return () => clearTimeout(timer);
   }, [onReady]);
+
   return (
     <Canvas
       camera={{ position: [0, 2, 12], fov: 60 }}
@@ -330,6 +345,7 @@ export function ChristmasScene({
         orbitRotation={orbitRotation}
         handPosition={handPosition}
         onStarFocusChange={onStarFocusChange}
+        onPhotosChange={onPhotosChange} // 传递回调给SceneContent
       />
     </Canvas>
   );
